@@ -1,0 +1,17 @@
+try{
+			byte[] read = new byte[1024];
+			int nrOfLines = 0;
+			int nrOfChars = 0;
+			boolean empty = true;
+			while((nrOfChars = input.read(read)) != 0){ //As long as there are unread bytes in the file i loops.
+				empty = false;
+				for(int n = 0; n < nrOfChars; n++){
+					if(read[n] == '\n'){
+						nrOfLines++;
+					}
+				}
+			}
+			return (nrOfLines == 0 && !empty ? 1 : nrOfLines);
+		}finally{
+			input.close();
+		}
