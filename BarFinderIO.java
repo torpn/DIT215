@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -106,4 +109,29 @@ public class BarFinderIO {
 		
 		return html;
 	}
+
+    public static Connection getConnection(){
+        try {
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+        }    catch(Exception ex){
+            
+        }
+        Connection conn = null;
+        String uri = "jdbc:mysql://leia.skip.chalmers.se:3306/team_02?useSSL=false";
+        String username = "team_02";
+        String password = "xWIgxDH7WM68kNM1";
+    
+        try {
+            conn = DriverManager.getConnection(uri,    username, password);
+            return conn;
+
+        }    catch (SQLException ex)    {
+            System.out.println("Error: ");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.getSQLState());
+            System.out.println(ex.getErrorCode());
+        }
+        
+    return conn;
+    }
 }
