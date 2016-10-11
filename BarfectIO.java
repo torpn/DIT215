@@ -14,10 +14,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import com.google.appengine.labs.repackaged.org.json.JSONArray;
+import com.google.appengine.labs.repackaged.org.json.JSONException;
+import com.google.appengine.labs.repackaged.org.json.JSONObject;
+
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -118,10 +125,10 @@ public class BarfectIO {
 	}
 	
 	//Joacim Eberlen
-	public static String toFile(String activeSite, String query, int barNumber) throws IOException{
+	public static String googleMapsRequest(String activeSite) throws IOException{
 		
 		Document activePage;
-		activePage = Jsoup.connect(activeSite).maxBodySize(1000).get();
+		activePage = Jsoup.connect(activeSite).ignoreHttpErrors(true).timeout(0).ignoreContentType(true).maxBodySize(0).get();
 		Element con = activePage.body();
 		String html = con.html();
 		
@@ -355,7 +362,7 @@ public class BarfectIO {
 		return barList;
 	}
 	
-	public static LinkedList<Bar> getBarsByNeighbourhoodId(String neighbourhood_id){
+	public static LinkedList<Bar> getBarsByNeighbourhood(String neighbourhood){
 		Connection conn = null;
 		String sqlCityPart = "SELECT * FROM address WHERE neighbourhood_id = ?";	
 		LinkedList<Bar> barList = new LinkedList<Bar>();
@@ -388,4 +395,59 @@ public class BarfectIO {
 		return barList;
 	}
 	
+	public static LinkedList<Bar> getAddressById(String barId){
+		Connection conn = null;
+		String sqlBarAddress = "SELECT bars.id, name, street, city FROM bars INNER JOIN address ON bars.id = address.id WHERE street LIKE ?";	
+		LinkedList<Bar> barList = new LinkedList<Bar>();
+		try {
+			conn = getConnection();
+			PreparedStatement prepedStmt = conn.prepareStatement(sqlBarAddress);
+			prepedStmt.setString(1, "%"+barId+"%");
+			ResultSet rs = prepedStmt.executeQuery();
+			while (rs.next()) {									
+				int id = rs.getInt("id");
+				String street = rs.getString("street");
+				String city = rs.getString("city");
+				String name = rs.getString("name");
+				
+				barList.add(new Bar(name, street, city, id));
+			}
+				
+		}	catch (SQLException ex)	{
+				ex.printStackTrace();
+		
+		}	finally {
+			try {
+				conn.close();
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return barList;
+	}
+		// Returns our neighborhood based on the adress from DB.
+	  	//Joacim Eberlen
+    public static String neighborhoodFinder(String barAddress) throws JSONException, IOException{
+		barAddress = null;
+		String url = ("https://maps.googleapis.com/maps/api/geocode/json?address="
+				+ ""+ URLEncoder.encode(barAddress, "UTF-8") +""
+				+ "&region=SE&"
+				+ "key=AIzaSyA4jTIpakEIlaJ3oU-s2biQzUbNB3oTbuQ");
+		
+		System.out.println(url);
+			System.out.println(googleMapsRequest(url));
+			String dataFromGoogle = googleMapsRequest(url);
+			
+			JSONObject ourJson = new JSONObject(dataFromGoogle);
+			JSONArray jsonObject1 = ourJson.getJSONArray("results");
+            JSONObject jsonObject2 = jsonObject1.getJSONObject(0);
+            JSONArray jsonObject3 = jsonObject2.getJSONArray("address_components");
+            JSONObject parsed = jsonObject3.getJSONObject(2);
+            
+            String neighborhood = (String) parsed.get("short_name");
+            System.out.println(neighborhood);
+            
+		return neighborhood; 
+		
+    }
 }
