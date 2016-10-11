@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import static dit215.Random.*;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
@@ -25,7 +24,7 @@ public class SQLScript {
 		dbName = "bank";
 
 		String query;
-		//query = "insert into BarName(aID, balance) values ("+aID+", "+ba+");"
+		query = "insert into BarName(aID, balance) values ("+aID+", "+ba+");"
 		//query = "use " + dbName + ";";
 		//query = "create table Account (name int(9) not null primary key, balance float);";
 		// End of testing VARS.
