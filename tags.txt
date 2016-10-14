@@ -1,7 +1,0 @@
-cheap
-expensive
-location
-club
-pub
-nice
-cozy
